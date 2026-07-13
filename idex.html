@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>濾水器壽命追蹤</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f2f5; 
+            color: #333;
+            padding: 15px;
+            margin: 0;
+        }
+        .container {
+            max-width: 420px;
+            margin: 10px auto;
+            background: white;
+            padding: 30px 25px;
+            border-radius: 25px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+        }
+        
+        h1 { font-size: 24px; color: #006064; margin-top: 0; }
+        
+        .capacity-display {
+            font-size: 60px;
+            font-weight: bold;
+            color: #009688; 
+            margin: 20px 0;
+        }
+        
+        /* 載入中動畫提示 */
+        .loading-text {
+            font-size: 14px;
+            color: #ff9800;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: none;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            color: #757575;
+            text-align: left;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e0f2f1; 
+            padding-bottom: 8px;
+        }
+        
+        .btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px; 
+            font-size: 16px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+            outline: none;
+        }
+        .btn:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { background-color: #cccccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .quick-actions { margin-bottom: 30px; }
+        .stepper-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #e0f2f1;
+            padding: 10px 20px;
+            border-radius: 40px;
+        }
+        
+        .btn-step { 
+            background-color: #80cbc4; 
+            width: 45px; 
+            height: 45px; 
+            padding: 0; 
+            font-size: 24px; 
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-deduct { background-color: #00897b; flex-grow: 1;}
+        .btn-large { background-color: #0097a7; width: 100%; padding: 15px; }
+        
+        .step-value {
+            font-size: 26px;
+            font-weight: bold;
+            min-width: 60px;
+            display: inline-block;
+            color: #004d40;
+        }
+
+        .custom-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        input[type="number"] {
+            flex: 1.2; 
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #b2dfdb;
+            border-radius: 25px; 
+            text-align: center;
+            background-color: #fafafa;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .btn-custom { 
+            background-color: #4db6ac; 
+            flex: 1;          
+            white-space: nowrap; 
+            padding: 12px 5px;   
+        }
+
+        .settings-row {
+            display: flex;
+            flex-direction: column; 
+            gap: 12px;
+            background: #eceff1; 
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        .settings-row input[type="number"] {
+            flex: none;
+            width: 100%;
+            border: 1px solid #cfd8dc;
+        }
+        
+        .btn-reset { 
+            background-color: #ef5350; 
+            width: 100%; 
+            border-radius: 15px;
+            padding: 14px; 
+        } 
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💧 濾心剩餘水量</h1>
+    
+    <div class="loading-text" id="loadingStatus">⏳ 雲端同步中...</div>
+    
+    <div class="capacity-display" id="remainingWater">--- L</div>
+    
+    <div class="quick-actions">
+        <div class="section-title">快速扣除 (毫升)</div>
+        <div class="stepper-row">
+            <button class="btn btn-step" onclick="adjustStep(-100)">-</button>
+            <div>
+                <span class="step-value" id="stepAmount">100</span> ml
+            </div>
+            <button class="btn btn-step" onclick="adjustStep(100)">+</button>
+            <button class="btn btn-deduct" onclick="recordStepAmount()">確認扣除</button>
+        </div>
+        
+        <button class="btn btn-large" onclick="recordWater(5)">- 5 公升 (常用水壺)</button>
+    </div>
+
+    <div class="section-title">自訂扣除量</div>
+    <div class="custom-row">
+        <input type="number" id="customAmount" placeholder="輸入數值" min="0">
+        <button class="btn btn-custom" onclick="recordCustom('ml')">扣除毫升</button>
+        <button class="btn btn-custom" onclick="recordCustom('L')">扣除公升</button>
+    </div>
+    
+    <div class="section-title">濾心設定</div>
+    <div class="settings-row">
+        <input type="number" id="newFilterCapacity" value="900" placeholder="設定新濾心總容量(L)">
+        <button class="btn btn-reset" onclick="resetFilter()">🔄 重置 / 更換濾心</button>
+    </div>
+</div>
+
+<script>
+    // 🛠️ 關鍵設定：請在此處填入你的 Google Apps Script 部署網址
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzgDkfQJKZy8eRinFWXylLH6i3IQahNY2A0u9mAqNBTiP2_JU0c6sy3nazbFou8MEA/exec";
+
+    let currentStepMl = 100;
+
+    // 當網頁載入完成時，主動去雲端讀取最新的賸餘水量
+    window.onload = function() {
+        fetchWaterData('read', 0);
+    };
+
+    // 核心連線函數：負責與 Google GAS 通訊
+    function fetchWaterData(action, amount) {
+        showLoading(true);
+        
+        // 組合 API 請求網址
+        let url = `${GAS_URL}?action=${action}&amount=${amount}`;
+        
+        // 使用 fetch 發送非同步請求
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                // 雲端回傳成功，更新畫面數值
+                document.getElementById('remainingWater').innerText = data.remaining.toFixed(2) + ' L';
+                showLoading(false);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('與雲端資料庫連線失敗，請檢查網址或網路狀態！');
+                showLoading(false);
+            });
+    }
+
+    // 控制「載入中」提示的顯示與按鈕禁用，避免重複點擊
+    function showLoading(isLoading) {
+        const statusText = document.getElementById('loadingStatus');
+        const allButtons = document.querySelectorAll('.btn');
+        
+        if (isLoading) {
+            statusText.style.display = 'block';
+            allButtons.forEach(btn => btn.disabled = true);
+        } else {
+            statusText.style.display = 'none';
+            allButtons.forEach(btn => btn.disabled = false);
+        }
+    }
+
+    // 快速扣除常用水量 (5L)
+    function recordWater(amountInLiters) {
+        fetchWaterData('deduct', amountInLiters);
+    }
+
+    // 處理加減 100 毫升的邏輯 (純前端互動)
+    function adjustStep(change) {
+        currentStepMl += change;
+        if (currentStepMl < 100) currentStepMl = 100;
+        document.getElementById('stepAmount').innerText = currentStepMl;
+    }
+
+    // 確認扣除階層毫升
+    function recordStepAmount() {
+        let amountInLiters = currentStepMl / 1000;
+        fetchWaterData('deduct', amountInLiters);
+        currentStepMl = 100; // 恢復預設
+        document.getElementById('stepAmount').innerText = currentStepMl;
+    }
+
+    // 處理自訂輸入 (支援毫升或公升)
+    function recordCustom(unit) {
+        const inputField = document.getElementById('customAmount');
+        let amount = parseFloat(inputField.value);
+        
+        if (isNaN(amount) || amount <= 0) {
+            alert('請輸入大於 0 的有效數字！');
+            return;
+        }
+
+        if (unit === 'ml') {
+            amount = amount / 1000; 
+        } 
+        
+        fetchWaterData('deduct', amount);
+        inputField.value = ''; 
+    }
+
+    // 重置與自訂總容量
+    function resetFilter() {
+        const capacityInput = document.getElementById('newFilterCapacity');
+        const newCapacity = parseFloat(capacityInput.value);
+
+        if (isNaN(newCapacity) || newCapacity <= 0) {
+            alert('請輸入有效的濾心總公升數！');
+            return;
+        }
+
+        if(confirm(`確定要將雲端剩餘水量重置為 ${newCapacity} 公升嗎？`)) {
+            fetchWaterData('reset', newCapacity);
+        }
+    }
+</script>
+
+</body>
+</html>
