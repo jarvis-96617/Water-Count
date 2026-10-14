@@ -1,293 +1,508 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>濾水器壽命追蹤</title>
-    <link rel="apple-touch-icon" href="icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="濾心追蹤">
-    <style>
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f2f5; 
-            color: #333;
-            padding: 15px;
-            margin: 0;
-        }
-        .container {
-            max-width: 420px;
-            margin: 10px auto;
-            background: white;
-            padding: 30px 25px;
-            border-radius: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            box-sizing: border-box;
-        }
-        
-        h1 { font-size: 24px; color: #006064; margin-top: 0; }
-        
-        .capacity-display {
-            font-size: 60px;
-            font-weight: bold;
-            color: #009688; 
-            margin: 20px 0;
-        }
-        
-        /* 載入中動畫提示 */
-        .loading-text {
-            font-size: 14px;
-            color: #ff9800;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: none;
-        }
-        
-        .section-title {
-            font-size: 14px;
-            color: #757575;
-            text-align: left;
-            margin-bottom: 12px;
-            border-bottom: 2px solid #e0f2f1; 
-            padding-bottom: 8px;
-        }
-        
-        .btn {
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px; 
-            font-size: 16px;
-            cursor: pointer;
-            color: white;
-            font-weight: bold;
-            transition: 0.3s;
-            outline: none;
-        }
-        .btn:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-        .btn:hover { opacity: 0.9; }
-        .btn:disabled { background-color: #cccccc; cursor: not-allowed; transform: none; box-shadow: none; }
-        
-        .quick-actions { margin-bottom: 30px; }
-        .stepper-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: #e0f2f1;
-            padding: 10px 20px;
-            border-radius: 40px;
-        }
-        
-        .btn-step { 
-            background-color: #80cbc4; 
-            width: 45px; 
-            height: 45px; 
-            padding: 0; 
-            font-size: 24px; 
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .btn-deduct { background-color: #00897b; flex-grow: 1;}
-        .btn-large { background-color: #0097a7; width: 100%; padding: 15px; }
-        
-        .step-value {
-            font-size: 26px;
-            font-weight: bold;
-            min-width: 60px;
-            display: inline-block;
-            color: #004d40;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>濾水器壽命追蹤</title>
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="濾心追蹤">
+<meta name="theme-color" content="#e6f6f7">
+<script>
+/* 先套用主題，避免開啟時閃一下 */
+(function(){try{var p=localStorage.getItem('wf_theme')||'auto';var d=p==='dark'||(p==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';}catch(e){}})();
+</script>
+<style>
+:root{
+  --bg1:#e6f6f7; --bg2:#cfe6f4;
+  --blob1:#7fd6dc; --blob2:#9cc2f2; --blob3:#bfeadb; --blob-o:.75;
+  --text:#0d2b33; --muted:rgba(13,43,51,.62);
+  --glass:rgba(255,255,255,.52); --glass-strong:rgba(255,255,255,.84);
+  --edge:rgba(255,255,255,.75); --hi:rgba(255,255,255,.9);
+  --shadow:0 12px 40px rgba(20,90,110,.14);
+  --field:rgba(255,255,255,.6); --soft:rgba(10,125,137,.1);
+  --accent:#0a7d89; --btn-a:#0a7d89; --btn-b:#0a6a8c; --btn-fg:#fff;
+  --water:#2bb8c6; --water-deep:#0f8fa6; --water-lite:rgba(120,220,230,.55);
+  --warn:#c77a0a; --danger:#d3463a;
+  --seg-on:rgba(255,255,255,.95);
+  color-scheme:light;
+}
+html[data-theme="dark"]{
+  --bg1:#06141c; --bg2:#0a2230;
+  --blob1:#0e6f86; --blob2:#1b4fa0; --blob3:#0f7a62; --blob-o:.5;
+  --text:#e6f6f8; --muted:rgba(230,246,248,.62);
+  --glass:rgba(255,255,255,.07); --glass-strong:rgba(14,34,46,.88);
+  --edge:rgba(255,255,255,.14); --hi:rgba(255,255,255,.22);
+  --shadow:0 12px 40px rgba(0,0,0,.4);
+  --field:rgba(255,255,255,.06); --soft:rgba(79,216,228,.14);
+  --accent:#4fd8e4; --btn-a:#35c9d7; --btn-b:#4aa8e8; --btn-fg:#04222a;
+  --water:#2fc4d2; --water-deep:#0b6f8a; --water-lite:rgba(90,215,230,.4);
+  --warn:#f2b04a; --danger:#ff7a6b;
+  --seg-on:rgba(255,255,255,.16);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg1)}
+body{
+  margin:0; min-height:100dvh; color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei","Segoe UI",Roboto,sans-serif;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 32px);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;
+  transition:background .4s,color .4s;
+}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:var(--blob-o)}
+.blob.a{width:300px;height:300px;background:var(--blob1);top:-70px;left:-90px}
+.blob.b{width:340px;height:340px;background:var(--blob2);top:38%;right:-140px}
+.blob.c{width:280px;height:280px;background:var(--blob3);bottom:-80px;left:-60px}
+.app{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 
-        .custom-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            align-items: center;
-        }
-        input[type="number"] {
-            flex: 1.2; 
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #b2dfdb;
-            border-radius: 25px; 
-            text-align: center;
-            background-color: #fafafa;
-            box-sizing: border-box;
-            width: 100%;
-        }
-        .btn-custom { 
-            background-color: #4db6ac; 
-            flex: 1;          
-            white-space: nowrap; 
-            padding: 12px 5px;   
-        }
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px}
+h1{margin:0;font-size:20px;font-weight:650;letter-spacing:.02em}
+.sync{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:#3fbf7f}
+.sync.busy .dot{background:#f2b04a;animation:pulse 1s ease-in-out infinite}
+.sync.off .dot{background:var(--danger)}
+@keyframes pulse{50%{opacity:.25}}
 
-        .settings-row {
-            display: flex;
-            flex-direction: column; 
-            gap: 12px;
-            background: #eceff1; 
-            padding: 20px;
-            border-radius: 15px;
-        }
-        
-        .settings-row input[type="number"] {
-            flex: none;
-            width: 100%;
-            border: 1px solid #cfd8dc;
-        }
-        
-        .btn-reset { 
-            background-color: #ef5350; 
-            width: 100%; 
-            border-radius: 15px;
-            padding: 14px; 
-        } 
-    </style>
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
+.seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer;transition:background .25s,color .25s}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+
+.card{
+  position:relative;border-radius:28px;padding:22px 20px;
+  background:var(--glass);border:1px solid var(--edge);
+  box-shadow:var(--shadow),inset 0 1px 0 var(--hi);
+  -webkit-backdrop-filter:blur(26px) saturate(170%);backdrop-filter:blur(26px) saturate(170%);
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.card,.seg{background:var(--glass-strong)}}
+h2,summary{margin:0 0 14px;font-size:15px;font-weight:600;color:var(--muted)}
+
+/* 主視覺：水位 */
+.hero{text-align:center;padding-top:26px}
+.tank{position:relative;width:188px;height:188px;margin:0 auto 18px;border-radius:50%;overflow:hidden;
+  border:1.5px solid var(--edge);background:rgba(255,255,255,.08);
+  box-shadow:inset 0 6px 18px rgba(255,255,255,.25),inset 0 -10px 24px rgba(0,0,0,.08),0 10px 30px rgba(10,110,130,.18)}
+.tank::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse 60% 35% at 32% 16%,rgba(255,255,255,.55),transparent 70%)}
+.water{position:absolute;left:0;right:0;bottom:0;height:calc(var(--lvl,0)*100%);
+  background:linear-gradient(var(--water),var(--water-deep));transition:height 1.2s cubic-bezier(.22,.8,.3,1)}
+.wave{position:absolute;left:0;width:200%;height:20px;fill:var(--water)}
+.wave.w1{top:-19px;animation:drift 7s linear infinite}
+.wave.w2{top:-23px;fill:var(--water-lite);animation:drift 11s linear infinite reverse}
+@keyframes drift{to{transform:translateX(-50%)}}
+.hero[data-level="low"]{--water:#f0a63a;--water-deep:#c97a14;--water-lite:rgba(255,200,110,.5)}
+.hero[data-level="critical"]{--water:#ef6a5b;--water-deep:#c2382c;--water-lite:rgba(255,150,140,.5)}
+.hero[data-empty="1"] .wave{opacity:0}
+
+.reading{font-size:60px;font-weight:300;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.reading small{font-size:22px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
+.hero[data-level="low"] .reading{color:var(--warn)}
+.hero[data-level="critical"] .reading{color:var(--danger)}
+.meta{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;color:var(--muted);min-height:44px}
+.pill{padding:4px 12px;border-radius:999px;background:var(--soft);color:var(--accent);font-weight:600}
+.hero[data-level="low"] .pill{color:var(--warn)}
+.hero[data-level="critical"] .pill{color:var(--danger)}
+.history-nav{display:flex;gap:10px;margin-top:18px}
+.history-nav .btn{flex:1}
+
+/* 按鈕 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;font:inherit;font-size:16px;font-weight:600;
+  padding:14px 16px;border-radius:16px;cursor:pointer;color:var(--text);transition:transform .15s,opacity .2s,filter .2s}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.primary{color:var(--btn-fg);background:linear-gradient(135deg,var(--btn-a),var(--btn-b));box-shadow:0 6px 18px rgba(10,125,137,.28)}
+.soft{background:var(--soft);color:var(--accent)}
+.ghost{background:var(--field);border:1px solid var(--edge);font-size:14px;padding:11px 12px}
+.danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+.block{width:100%}
+.busy .btn,.busy .round{pointer-events:none;opacity:.6}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.stepper{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:12px;border-radius:999px;background:var(--field);border:1px solid var(--edge)}
+.round{width:46px;height:46px;border-radius:50%;border:0;font:inherit;font-size:26px;line-height:1;cursor:pointer;color:var(--accent);background:var(--soft);transition:transform .15s,opacity .2s}
+.round:active{transform:scale(.9)}
+.amt{font-variant-numeric:tabular-nums;color:var(--muted)}
+.amt b{font-size:30px;font-weight:600;color:var(--text);margin-right:4px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.sub{margin:20px 0 10px;font-size:13px;color:var(--muted)}
+.custom{display:flex;gap:8px}
+input[type=number]{flex:1.3;min-width:0;width:100%;padding:12px;font:inherit;font-size:16px;text-align:center;color:var(--text);
+  background:var(--field);border:1px solid var(--edge);border-radius:16px}
+input::placeholder{color:var(--muted)}
+.custom .btn{flex:1;padding:12px 6px;font-size:15px;white-space:nowrap}
+
+details.card{padding:0}
+summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin:0;padding:18px 20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .25s}
+details[open] summary::after{transform:rotate(-135deg)}
+.inner{padding:0 20px 20px}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;font-size:14px;border-top:1px solid var(--edge);font-variant-numeric:tabular-nums}
+li span:last-child{color:var(--muted);font-size:12px}
+li.undone{opacity:.4;text-decoration:line-through}
+.empty{margin:0;font-size:14px;color:var(--muted)}
+.field-label{display:block;margin-bottom:8px;font-size:13px;color:var(--muted)}
+.inner .btn{margin-top:12px}
+
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  max-width:calc(100% - 40px);padding:12px 18px;border-radius:999px;font-size:14px;font-weight:600;color:var(--text);
+  background:var(--glass-strong);border:1px solid var(--edge);box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);transition:opacity .25s,transform .25s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.error{color:var(--danger)}
+
+dialog{border:1px solid var(--edge);border-radius:24px;padding:22px;width:calc(100% - 48px);max-width:330px;color:var(--text);background:var(--glass-strong);
+  -webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(3,15,22,.35);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+dialog p{margin:0;line-height:1.6;font-size:15px}
+.actions{display:flex;gap:10px;margin-top:18px}
+.actions .btn{flex:1;margin:0}
+
+@media (prefers-reduced-motion:reduce){
+  .wave,.sync.busy .dot{animation:none}
+  *{transition-duration:.01ms!important}
+}
+</style>
 </head>
 <body>
+<div class="bg" aria-hidden="true"><span class="blob a"></span><span class="blob b"></span><span class="blob c"></span></div>
 
-<div class="container">
-    <h1>💧 濾心剩餘水量</h1>
-    
-    <div class="loading-text" id="loadingStatus">⏳ 雲端同步中...</div>
-    
-    <div class="capacity-display" id="remainingWater">--- L</div>
-    
-    <div class="quick-actions">
-        <div class="section-title">快速扣除 (毫升)</div>
-        <div class="stepper-row">
-            <button class="btn btn-step" onclick="adjustStep(-100)">-</button>
-            <div>
-                <span class="step-value" id="stepAmount">100</span> ml
-            </div>
-            <button class="btn btn-step" onclick="adjustStep(100)">+</button>
-            <button class="btn btn-deduct" onclick="recordStepAmount()">確認扣除</button>
-        </div>
-        
-        <button class="btn btn-large" onclick="recordWater(5)">- 5 公升 (常用水壺)</button>
+<main class="app" id="app">
+  <header>
+    <div>
+      <h1>濾心追蹤</h1>
+      <div class="sync" id="sync"><span class="dot"></span><span id="syncText">尚未同步</span></div>
     </div>
+    <div class="seg" role="group" aria-label="外觀">
+      <button type="button" data-theme="auto" aria-label="跟隨系統">系統</button>
+      <button type="button" data-theme="light" aria-label="日間模式">日間</button>
+      <button type="button" data-theme="dark" aria-label="夜間模式">夜間</button>
+    </div>
+  </header>
 
-    <div class="section-title">自訂扣除量</div>
-    <div class="custom-row">
-        <input type="number" id="customAmount" placeholder="輸入數值" min="0">
-        <button class="btn btn-custom" onclick="recordCustom('ml')">扣除毫升</button>
-        <button class="btn btn-custom" onclick="recordCustom('L')">扣除公升</button>
+  <section class="card hero" id="hero" data-level="ok">
+    <div class="tank" aria-hidden="true">
+      <div class="water" id="water">
+        <svg class="wave w1" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20Q150 0 300 20T600 20T900 20T1200 20V40H0Z"/></svg>
+        <svg class="wave w2" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20Q150 40 300 20T600 20T900 20T1200 20V40H0Z"/></svg>
+      </div>
     </div>
-    
-    <div class="section-title">濾心設定</div>
-    <div class="settings-row">
-        <input type="number" id="newFilterCapacity" value="900" placeholder="設定新濾心總容量(L)">
-        <button class="btn btn-reset" onclick="resetFilter()">🔄 重置 / 更換濾心</button>
+    <div class="reading" aria-live="polite"><span id="num">---</span><small>L</small></div>
+    <div class="meta">
+      <span class="pill" id="pct">—</span>
+      <span id="eta"></span>
     </div>
-</div>
+    <div class="history-nav">
+      <button class="btn ghost" id="undo" type="button"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>上一步</button>
+      <button class="btn ghost" id="redo" type="button">下一步<svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>扣除水量</h2>
+    <div class="stepper">
+      <button class="round" id="minus" type="button" aria-label="減少 100 毫升">−</button>
+      <div class="amt"><b id="step">100</b>ml</div>
+      <button class="round" id="plus" type="button" aria-label="增加 100 毫升">+</button>
+    </div>
+    <div class="stack">
+      <button class="btn primary block" id="confirm" type="button">確認扣除 100 ml</button>
+      <button class="btn soft block" id="five" type="button">扣除 5 公升（常用水壺）</button>
+    </div>
+    <div class="sub">自訂扣除量</div>
+    <div class="custom">
+      <input type="number" id="custom" inputmode="decimal" placeholder="輸入數值" min="0" step="any" aria-label="自訂扣除數值">
+      <button class="btn soft" data-unit="ml" type="button">扣除毫升</button>
+      <button class="btn soft" data-unit="L" type="button">扣除公升</button>
+    </div>
+  </section>
+
+  <details class="card">
+    <summary>最近紀錄</summary>
+    <div class="inner">
+      <ul id="log"></ul>
+      <p class="empty" id="logEmpty">還沒有紀錄</p>
+    </div>
+  </details>
+
+  <details class="card">
+    <summary>濾心設定</summary>
+    <div class="inner">
+      <label class="field-label" for="cap">新濾心總容量（公升）</label>
+      <input type="number" id="cap" inputmode="decimal" min="0" step="any" value="900">
+      <button class="btn danger block" id="reset" type="button">重置 / 更換濾心</button>
+    </div>
+  </details>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <p id="dlgMsg"></p>
+    <div class="actions">
+      <button class="btn ghost" value="cancel">取消</button>
+      <button class="btn primary" value="ok">確定</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
-    // 🛠️ 關鍵設定：請在此處填入你的 Google Apps Script 部署網址
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzgDkfQJKZy8eRinFWXylLH6i3IQahNY2A0u9mAqNBTiP2_JU0c6sy3nazbFou8MEA/exec";
+(function(){
+'use strict';
+// 🛠️ 你的 Google Apps Script 部署網址
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzgDkfQJKZy8eRinFWXylLH6i3IQahNY2A0u9mAqNBTiP2_JU0c6sy3nazbFou8MEA/exec";
 
-    let currentStepMl = 100;
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
 
-    // 當網頁載入完成時，主動去雲端讀取最新的賸餘水量
-    window.onload = function() {
-        fetchWaterData('read', 0);
-    };
+const state = {
+  remaining: lsGet('wf_remaining', null),
+  total: lsGet('wf_total', 900),
+  hist: lsGet('wf_hist', []),
+  ptr: lsGet('wf_ptr', 0),
+  step: 100, busy: false, offline: false, syncedAt: null, shown: null
+};
+state.ptr = Math.min(state.ptr, state.hist.length);
 
-    // 核心連線函數：負責與 Google GAS 通訊
-    function fetchWaterData(action, amount) {
-        showLoading(true);
-        
-        // 組合 API 請求網址
-        let url = `${GAS_URL}?action=${action}&amount=${amount}`;
-        
-        // 使用 fetch 發送非同步請求
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                // 雲端回傳成功，更新畫面數值
-                document.getElementById('remainingWater').innerText = data.remaining.toFixed(2) + ' L';
-                showLoading(false);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('與雲端資料庫連線失敗，請檢查網址或網路狀態！');
-                showLoading(false);
-            });
+/* ───────── 主題：跟隨系統 / 日 / 夜 ───────── */
+const mq = matchMedia('(prefers-color-scheme: dark)');
+const themePref = () => { try { return localStorage.getItem('wf_theme') || 'auto'; } catch(e){ return 'auto'; } };
+function applyTheme(){
+  const pref = themePref();
+  const dark = pref === 'dark' || (pref === 'auto' && mq.matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#06141c' : '#e6f6f7');
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === pref)));
+}
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  try { localStorage.setItem('wf_theme', b.dataset.theme); } catch(e){}
+  applyTheme();
+}));
+mq.addEventListener ? mq.addEventListener('change', applyTheme) : mq.addListener(applyTheme);
+
+/* ───────── 雲端通訊 ───────── */
+async function api(action, amount){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const res = await fetch(`${GAS_URL}?action=${action}&amount=${amount}`, { signal: ctrl.signal });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const r = Number(data.remaining);
+    if (!isFinite(r)) throw new Error('bad response');
+    return r;
+  } finally { clearTimeout(timer); }
+}
+
+function persist(){
+  lsSet('wf_remaining', state.remaining);
+  lsSet('wf_total', state.total);
+  lsSet('wf_hist', state.hist);
+  lsSet('wf_ptr', state.ptr);
+}
+function markSynced(){ state.offline = false; state.syncedAt = Date.now(); }
+function setBusy(b){ state.busy = b; document.body.classList.toggle('busy', b); render(); }
+
+async function sync(){
+  if (state.busy) return;
+  setBusy(true);
+  try {
+    state.remaining = await api('read', 0);
+    if (state.remaining > state.total) state.total = state.remaining;
+    markSynced(); persist();
+  } catch(e){
+    state.offline = true;
+    toast('無法連線到雲端，顯示的是上次的數值', true);
+  } finally { setBusy(false); }
+}
+
+function pushHistory(entry){
+  state.hist = state.hist.slice(0, state.ptr);
+  state.hist.push(entry);
+  if (state.hist.length > 60) state.hist.shift();
+  state.ptr = state.hist.length;
+}
+
+async function perform(kind, amount){
+  if (state.busy) return false;
+  setBusy(true);
+  try {
+    const prev = state.remaining, totalBefore = state.total;
+    const after = await api(kind, amount);
+    if (kind === 'reset') state.total = amount; else if (after > state.total) state.total = after;
+    state.remaining = after;
+    pushHistory({
+      type: kind, amount, after, totalBefore, totalAfter: state.total, t: Date.now(),
+      before: prev ?? (kind === 'deduct' ? after + amount : after)
+    });
+    markSynced(); persist(); buzz();
+    toast(kind === 'deduct' ? `已扣除 ${fmtAmt(amount)}` : `已重置為 ${amount} L`);
+    return true;
+  } catch(e){
+    state.offline = true;
+    toast('操作失敗，請檢查網路後再試', true);
+    return false;
+  } finally { setBusy(false); }
+}
+
+/* ───────── 上一步 / 下一步 ───────── */
+async function travel(dir){
+  if (state.busy) return;
+  const undo = dir < 0;
+  if (undo ? state.ptr === 0 : state.ptr >= state.hist.length) return;
+  const e = state.hist[undo ? state.ptr - 1 : state.ptr];
+  const target = undo ? e.before : e.after;
+  const expected = undo ? e.after : e.before;
+  setBusy(true);
+  try {
+    const cur = await api('read', 0);
+    if (Math.abs(cur - expected) > 0.005) {
+      const ok = await ask(`雲端目前是 ${cur.toFixed(2)} L，和這筆紀錄不一致（可能其他裝置也有更動）。仍要${undo ? '還原' : '重做'}並設為 ${target.toFixed(2)} L 嗎？`);
+      if (!ok) return;
     }
+    // 現有 API 沒有「復原」動作，所以用 reset 把剩餘水量設回指定值
+    state.remaining = await api('reset', +target.toFixed(3));
+    state.total = undo ? e.totalBefore : e.totalAfter;
+    state.ptr += undo ? -1 : 1;
+    markSynced(); persist(); buzz();
+    toast(undo ? '已回到上一步' : '已重做');
+  } catch(err){
+    state.offline = true;
+    toast('操作失敗，請檢查網路後再試', true);
+  } finally { setBusy(false); }
+}
 
-    // 控制「載入中」提示的顯示與按鈕禁用，避免重複點擊
-    function showLoading(isLoading) {
-        const statusText = document.getElementById('loadingStatus');
-        const allButtons = document.querySelectorAll('.btn');
-        
-        if (isLoading) {
-            statusText.style.display = 'block';
-            allButtons.forEach(btn => btn.disabled = true);
-        } else {
-            statusText.style.display = 'none';
-            allButtons.forEach(btn => btn.disabled = false);
-        }
-    }
+/* ───────── 畫面 ───────── */
+const fmtAmt = a => a < 1 ? `${Math.round(a * 1000)} ml` : `${+a.toFixed(2)} L`;
+const fmtTime = t => new Date(t).toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false });
 
-    // 快速扣除常用水量 (5L)
-    function recordWater(amountInLiters) {
-        fetchWaterData('deduct', amountInLiters);
-    }
+function tween(to){
+  const el = $('num');
+  if (to == null) { el.textContent = '---'; state.shown = null; return; }
+  const from = state.shown;
+  state.shown = to;
+  const token = tween.t = (tween.t || 0) + 1;
+  if (from == null || REDUCED || from === to) { el.textContent = to.toFixed(2); return; }
+  const t0 = performance.now(), dur = 650;
+  (function frame(now){
+    if (token !== tween.t) return;
+    const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (from + (to - from) * e).toFixed(2);
+    if (p < 1) requestAnimationFrame(frame);
+  })(t0);
+}
 
-    // 處理加減 100 毫升的邏輯 (純前端互動)
-    function adjustStep(change) {
-        currentStepMl += change;
-        if (currentStepMl < 100) currentStepMl = 100;
-        document.getElementById('stepAmount').innerText = currentStepMl;
-    }
+function estimate(){
+  if (state.remaining == null) return '';
+  const now = Date.now(), DAY = 864e5;
+  const used = state.hist.slice(0, state.ptr).filter(e => e.type === 'deduct' && now - e.t < 30 * DAY);
+  if (used.length < 3) return '';
+  const first = Math.min(...used.map(e => e.t));
+  if (now - first < 2 * DAY) return '';
+  const perDay = used.reduce((s, e) => s + e.amount, 0) / ((now - first) / DAY);
+  if (perDay <= 0) return '';
+  const left = state.remaining / perDay;
+  return `平均每天 ${perDay.toFixed(1)} L，` + (left > 365 ? '一年內不會用完' : `約可再用 ${Math.round(left)} 天`);
+}
 
-    // 確認扣除階層毫升
-    function recordStepAmount() {
-        let amountInLiters = currentStepMl / 1000;
-        fetchWaterData('deduct', amountInLiters);
-        currentStepMl = 100; // 恢復預設
-        document.getElementById('stepAmount').innerText = currentStepMl;
-    }
+function render(){
+  const r = state.remaining;
+  const pct = r == null ? null : Math.max(0, Math.min(100, r / state.total * 100));
+  const level = pct == null ? 'ok' : pct <= 5 ? 'critical' : pct <= 15 ? 'low' : 'ok';
+  const hero = $('hero');
+  hero.dataset.level = level;
+  hero.dataset.empty = (pct == null || pct === 0) ? '1' : '0';
+  $('water').style.setProperty('--lvl', pct == null ? 0 : (pct > 0 ? Math.max(pct, 4) : 0) / 100);
+  tween(r);
+  $('pct').textContent = pct == null ? '—' : `${Math.round(pct)}% 剩餘`;
+  $('eta').textContent = level === 'critical' ? '快用完了，請盡快更換濾心'
+    : level === 'low' ? '剩不到 15%，建議準備新濾心' : estimate();
 
-    // 處理自訂輸入 (支援毫升或公升)
-    function recordCustom(unit) {
-        const inputField = document.getElementById('customAmount');
-        let amount = parseFloat(inputField.value);
-        
-        if (isNaN(amount) || amount <= 0) {
-            alert('請輸入大於 0 的有效數字！');
-            return;
-        }
+  $('undo').disabled = state.busy || state.ptr === 0;
+  $('redo').disabled = state.busy || state.ptr >= state.hist.length;
+  $('step').textContent = state.step;
+  $('confirm').textContent = `確認扣除 ${state.step} ml`;
 
-        if (unit === 'ml') {
-            amount = amount / 1000; 
-        } 
-        
-        fetchWaterData('deduct', amount);
-        inputField.value = ''; 
-    }
+  const sync = $('sync');
+  sync.className = 'sync' + (state.busy ? ' busy' : state.offline ? ' off' : '');
+  $('syncText').textContent = state.busy ? '同步中…'
+    : state.offline ? '無法連線，顯示上次的數值'
+    : state.syncedAt ? `已同步 ${new Date(state.syncedAt).toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit', hour12:false })}`
+    : '尚未同步';
 
-    // 重置與自訂總容量
-    function resetFilter() {
-        const capacityInput = document.getElementById('newFilterCapacity');
-        const newCapacity = parseFloat(capacityInput.value);
+  const log = $('log'); log.textContent = '';
+  const shown = state.hist.map((e, i) => ({ e, i })).reverse().slice(0, 10);
+  shown.forEach(({ e, i }) => {
+    const li = document.createElement('li');
+    if (i >= state.ptr) li.className = 'undone';
+    const a = document.createElement('span');
+    a.textContent = e.type === 'deduct' ? `− ${fmtAmt(e.amount)}` : `更換濾心，重置為 ${e.after} L`;
+    const b = document.createElement('span'); b.textContent = fmtTime(e.t);
+    li.append(a, b); log.append(li);
+  });
+  $('logEmpty').style.display = shown.length ? 'none' : 'block';
+}
 
-        if (isNaN(newCapacity) || newCapacity <= 0) {
-            alert('請輸入有效的濾心總公升數！');
-            return;
-        }
+let toastTimer;
+function toast(msg, isError){
+  const t = $('toast');
+  t.textContent = msg; t.className = 'show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(12); } catch(e){} };
 
-        if(confirm(`確定要將雲端剩餘水量重置為 ${newCapacity} 公升嗎？`)) {
-            fetchWaterData('reset', newCapacity);
-        }
-    }
+function ask(msg){
+  const dlg = $('dlg');
+  $('dlgMsg').textContent = msg;
+  dlg.returnValue = '';
+  dlg.showModal();
+  return new Promise(res => dlg.addEventListener('close', () => res(dlg.returnValue === 'ok'), { once: true }));
+}
+
+/* ───────── 操作 ───────── */
+$('minus').addEventListener('click', () => { state.step = Math.max(100, state.step - 100); render(); });
+$('plus').addEventListener('click', () => { state.step += 100; render(); });
+$('confirm').addEventListener('click', async () => {
+  if (await perform('deduct', state.step / 1000)) { state.step = 100; render(); }
+});
+$('five').addEventListener('click', () => perform('deduct', 5));
+
+document.querySelectorAll('.custom .btn').forEach(btn => btn.addEventListener('click', async () => {
+  const input = $('custom');
+  let amount = parseFloat(input.value);
+  if (isNaN(amount) || amount <= 0) { toast('請輸入大於 0 的有效數字', true); input.focus(); return; }
+  if (btn.dataset.unit === 'ml') amount /= 1000;
+  if (await perform('deduct', amount)) input.value = '';
+}));
+
+$('reset').addEventListener('click', async () => {
+  const cap = parseFloat($('cap').value);
+  if (isNaN(cap) || cap <= 0) { toast('請輸入有效的濾心總公升數', true); return; }
+  if (await ask(`確定要將雲端剩餘水量重置為 ${cap} 公升嗎？`)) perform('reset', cap);
+});
+
+$('undo').addEventListener('click', () => travel(-1));
+$('redo').addEventListener('click', () => travel(1));
+
+// 回到 App（例如從背景切回來）時自動更新
+document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
+
+/* ───────── 啟動 ───────── */
+$('cap').value = state.total;
+applyTheme();
+render();
+sync();
+})();
 </script>
-
 </body>
 </html>
