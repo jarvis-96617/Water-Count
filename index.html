@@ -2,7 +2,7 @@
 <html lang="zh-TW" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>濾水器壽命追蹤</title>
 <link rel="apple-touch-icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,10 +19,10 @@
   --bg1:#e6f6f7; --bg2:#cfe6f4;
   --blob1:#7fd6dc; --blob2:#9cc2f2; --blob3:#bfeadb; --blob-o:.75;
   --text:#0d2b33; --muted:rgba(13,43,51,.62);
-  --glass:rgba(255,255,255,.52); --glass-strong:rgba(255,255,255,.84);
+  --glass:rgba(255,255,255,.52); --glass-strong:rgba(255,255,255,.88);
   --edge:rgba(255,255,255,.75); --hi:rgba(255,255,255,.9);
-  --shadow:0 12px 40px rgba(20,90,110,.14);
-  --field:rgba(255,255,255,.6); --soft:rgba(10,125,137,.1);
+  --shadow:0 12px 36px rgba(20,90,110,.12);
+  --field:rgba(255,255,255,.62); --soft:rgba(10,125,137,.1);
   --accent:#0a7d89; --btn-a:#0a7d89; --btn-b:#0a6a8c; --btn-fg:#fff;
   --water:#2bb8c6; --water-deep:#0f8fa6; --water-lite:rgba(120,220,230,.55);
   --warn:#c77a0a; --danger:#d3463a;
@@ -33,9 +33,9 @@ html[data-theme="dark"]{
   --bg1:#06141c; --bg2:#0a2230;
   --blob1:#0e6f86; --blob2:#1b4fa0; --blob3:#0f7a62; --blob-o:.5;
   --text:#e6f6f8; --muted:rgba(230,246,248,.62);
-  --glass:rgba(255,255,255,.07); --glass-strong:rgba(14,34,46,.88);
+  --glass:rgba(255,255,255,.07); --glass-strong:rgba(14,34,46,.92);
   --edge:rgba(255,255,255,.14); --hi:rgba(255,255,255,.22);
-  --shadow:0 12px 40px rgba(0,0,0,.4);
+  --shadow:0 12px 40px rgba(0,0,0,.42);
   --field:rgba(255,255,255,.06); --soft:rgba(79,216,228,.14);
   --accent:#4fd8e4; --btn-a:#35c9d7; --btn-b:#4aa8e8; --btn-fg:#04222a;
   --water:#2fc4d2; --water-deep:#0b6f8a; --water-lite:rgba(90,215,230,.4);
@@ -44,24 +44,33 @@ html[data-theme="dark"]{
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg1)}
+html,body{height:100%;margin:0;background:var(--bg1)}
 body{
-  margin:0; min-height:100dvh; color:var(--text);
+  height:100dvh; max-height:100dvh; overflow:hidden;
+  color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei","Segoe UI",Roboto,sans-serif;
-  padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 32px);
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 14px calc(env(safe-area-inset-bottom,0px) + 10px);
   background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;
   transition:background .4s,color .4s;
+  display:flex; flex-direction:column; justify-content:center;
 }
 .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
 .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:var(--blob-o)}
 .blob.a{width:300px;height:300px;background:var(--blob1);top:-70px;left:-90px}
 .blob.b{width:340px;height:340px;background:var(--blob2);top:38%;right:-140px}
 .blob.c{width:280px;height:280px;background:var(--blob3);bottom:-80px;left:-60px}
-.app{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px}
-h1{margin:0;font-size:20px;font-weight:650;letter-spacing:.02em}
-.sync{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--muted)}
+/* ───────── 手機版：一頁式緊湊容器 (<768px) ───────── */
+.app{
+  width:100%; max-width:440px; height:100%; max-height:760px;
+  margin:0 auto;
+  display:flex; flex-direction:column; justify-content:space-between;
+  gap:clamp(8px, 1.4dvh, 12px);
+}
+
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px;flex-shrink:0}
+h1{margin:0;font-size:clamp(18px, 2.5dvh, 22px);font-weight:700;letter-spacing:.02em}
+.sync{display:flex;align-items:center;gap:6px;margin-top:2px;font-size:12px;color:var(--muted)}
 .dot{width:7px;height:7px;border-radius:50%;background:#3fbf7f}
 .sync.busy .dot{background:#f2b04a;animation:pulse 1s ease-in-out infinite}
 .sync.off .dot{background:var(--danger)}
@@ -69,89 +78,231 @@ h1{margin:0;font-size:20px;font-weight:650;letter-spacing:.02em}
 
 .seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);
   -webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
-.seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer;transition:background .25s,color .25s}
+.seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;cursor:pointer;transition:background .25s,color .25s}
 .seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 
+.bento{
+  flex:1; min-height:0;
+  display:flex; flex-direction:column; justify-content:space-between;
+  gap:clamp(8px, 1.4dvh, 12px);
+}
+
 .card{
-  position:relative;border-radius:28px;padding:22px 20px;
-  background:var(--glass);border:1px solid var(--edge);
+  position:relative; border-radius:24px;
+  padding:clamp(12px, 2dvh, 18px) 16px;
+  background:var(--glass); border:1px solid var(--edge);
   box-shadow:var(--shadow),inset 0 1px 0 var(--hi);
   -webkit-backdrop-filter:blur(26px) saturate(170%);backdrop-filter:blur(26px) saturate(170%);
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.card,.seg{background:var(--glass-strong)}}
-h2,summary{margin:0 0 14px;font-size:15px;font-weight:600;color:var(--muted)}
+h2{margin:0 0 clamp(8px, 1.4dvh, 12px);font-size:14px;font-weight:600;color:var(--muted);letter-spacing:.02em}
 
-/* 主視覺：水位 */
-.hero{text-align:center;padding-top:26px}
-.tank{position:relative;width:188px;height:188px;margin:0 auto 18px;border-radius:50%;overflow:hidden;
-  border:1.5px solid var(--edge);background:rgba(255,255,255,.08);
-  box-shadow:inset 0 6px 18px rgba(255,255,255,.25),inset 0 -10px 24px rgba(0,0,0,.08),0 10px 30px rgba(10,110,130,.18)}
+/* 主視覺：手機採用左水球、右數據橫向排版 */
+.hero{
+  display:flex; flex-direction:column; justify-content:space-between;
+  flex-shrink:0;
+}
+.hero-main{
+  display:flex; align-items:center; justify-content:center;
+  gap:18px; padding:2px 4px;
+}
+.tank{
+  position:relative;
+  width:clamp(94px, 14.5dvh, 124px);
+  height:clamp(94px, 14.5dvh, 124px);
+  flex-shrink:0; border-radius:50%; overflow:hidden;
+  border:1.5px solid var(--edge); background:rgba(255,255,255,.08);
+  box-shadow:inset 0 6px 18px rgba(255,255,255,.25),inset 0 -10px 24px rgba(0,0,0,.08),0 8px 24px rgba(10,110,130,.18);
+}
 .tank::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
   background:radial-gradient(ellipse 60% 35% at 32% 16%,rgba(255,255,255,.55),transparent 70%)}
 .water{position:absolute;left:0;right:0;bottom:0;height:calc(var(--lvl,0)*100%);
   background:linear-gradient(var(--water),var(--water-deep));transition:height 1.2s cubic-bezier(.22,.8,.3,1)}
-.wave{position:absolute;left:0;width:200%;height:20px;fill:var(--water)}
-.wave.w1{top:-19px;animation:drift 7s linear infinite}
-.wave.w2{top:-23px;fill:var(--water-lite);animation:drift 11s linear infinite reverse}
+.wave{position:absolute;left:0;width:200%;height:18px;fill:var(--water)}
+.wave.w1{top:-17px;animation:drift 7s linear infinite}
+.wave.w2{top:-21px;fill:var(--water-lite);animation:drift 11s linear infinite reverse}
 @keyframes drift{to{transform:translateX(-50%)}}
 .hero[data-level="low"]{--water:#f0a63a;--water-deep:#c97a14;--water-lite:rgba(255,200,110,.5)}
 .hero[data-level="critical"]{--water:#ef6a5b;--water-deep:#c2382c;--water-lite:rgba(255,150,140,.5)}
 .hero[data-empty="1"] .wave{opacity:0}
 
-.reading{font-size:60px;font-weight:300;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
-.reading small{font-size:22px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
+.hero-info{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.reading{font-size:clamp(38px, 6dvh, 48px);font-weight:300;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.reading small{font-size:18px;font-weight:500;color:var(--muted);margin-left:4px;letter-spacing:0}
 .hero[data-level="low"] .reading{color:var(--warn)}
 .hero[data-level="critical"] .reading{color:var(--danger)}
-.meta{margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;color:var(--muted);min-height:44px}
-.pill{padding:4px 12px;border-radius:999px;background:var(--soft);color:var(--accent);font-weight:600}
+.meta{margin-top:8px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;font-size:12px;color:var(--muted)}
+.pill{padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--accent);font-weight:600;font-size:12px}
 .hero[data-level="low"] .pill{color:var(--warn)}
 .hero[data-level="critical"] .pill{color:var(--danger)}
-.history-nav{display:flex;gap:10px;margin-top:18px}
+#eta{line-height:1.35}
+
+.history-nav{display:flex;gap:8px;margin-top:clamp(10px, 1.6dvh, 14px)}
 .history-nav .btn{flex:1}
 
-/* 按鈕 */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;font:inherit;font-size:16px;font-weight:600;
-  padding:14px 16px;border-radius:16px;cursor:pointer;color:var(--text);transition:transform .15s,opacity .2s,filter .2s}
+/* 按鈕與控制項 */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;
+  font:inherit;font-size:clamp(14px, 2dvh, 15px);font-weight:600;
+  padding:clamp(9px, 1.5dvh, 12px) 14px;border-radius:14px;
+  cursor:pointer;color:var(--text);transition:transform .15s,opacity .2s,filter .2s;
+}
 .btn:active:not(:disabled){transform:scale(.97)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.primary{color:var(--btn-fg);background:linear-gradient(135deg,var(--btn-a),var(--btn-b));box-shadow:0 6px 18px rgba(10,125,137,.28)}
+.btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.primary{color:var(--btn-fg);background:linear-gradient(135deg,var(--btn-a),var(--btn-b));box-shadow:0 6px 18px rgba(10,125,137,.26)}
 .soft{background:var(--soft);color:var(--accent)}
-.ghost{background:var(--field);border:1px solid var(--edge);font-size:14px;padding:11px 12px}
+.ghost{background:var(--field);border:1px solid var(--edge);font-size:13px;padding:clamp(7px, 1.2dvh, 10px) 10px}
 .danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
 .block{width:100%}
 .busy .btn,.busy .round{pointer-events:none;opacity:.6}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-.stepper{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:12px;border-radius:999px;background:var(--field);border:1px solid var(--edge)}
-.round{width:46px;height:46px;border-radius:50%;border:0;font:inherit;font-size:26px;line-height:1;cursor:pointer;color:var(--accent);background:var(--soft);transition:transform .15s,opacity .2s}
+/* 扣除水量卡片 */
+.deduct-card{
+  flex:1; min-height:0;
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.stepper{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:clamp(4px, 0.8dvh, 7px) 8px;
+  border-radius:999px;background:var(--field);border:1px solid var(--edge);
+}
+.round{
+  width:clamp(36px, 5.2dvh, 42px);height:clamp(36px, 5.2dvh, 42px);
+  border-radius:50%;border:0;font:inherit;font-size:22px;line-height:1;
+  cursor:pointer;color:var(--accent);background:var(--soft);transition:transform .15s,opacity .2s;
+}
 .round:active{transform:scale(.9)}
-.amt{font-variant-numeric:tabular-nums;color:var(--muted)}
-.amt b{font-size:30px;font-weight:600;color:var(--text);margin-right:4px}
-.stack{display:flex;flex-direction:column;gap:10px}
-.sub{margin:20px 0 10px;font-size:13px;color:var(--muted)}
-.custom{display:flex;gap:8px}
-input[type=number]{flex:1.3;min-width:0;width:100%;padding:12px;font:inherit;font-size:16px;text-align:center;color:var(--text);
-  background:var(--field);border:1px solid var(--edge);border-radius:16px}
+.amt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+.amt b{font-size:clamp(22px, 3.4dvh, 28px);font-weight:600;color:var(--text);margin-right:4px}
+.stack{display:flex;flex-direction:column;gap:clamp(6px, 1.1dvh, 10px);margin-top:clamp(6px, 1.1dvh, 10px)}
+.sub{margin:clamp(8px, 1.4dvh, 14px) 0 clamp(4px, 0.8dvh, 8px);font-size:12px;color:var(--muted);font-weight:500}
+.custom{display:flex;gap:6px}
+input[type=number]{
+  flex:1.25;min-width:0;width:100%;
+  padding:clamp(8px, 1.3dvh, 11px) 10px;
+  font:inherit;font-size:15px;text-align:center;color:var(--text);
+  background:var(--field);border:1px solid var(--edge);border-radius:14px;
+}
 input::placeholder{color:var(--muted)}
-.custom .btn{flex:1;padding:12px 6px;font-size:15px;white-space:nowrap}
+.custom .btn{flex:1;padding:clamp(8px, 1.3dvh, 11px) 6px;font-size:13px;white-space:nowrap}
 
-details.card{padding:0}
-summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin:0;padding:18px 20px}
-summary::-webkit-details-marker{display:none}
-summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .25s}
-details[open] summary::after{transform:rotate(-135deg)}
-.inner{padding:0 20px 20px}
+/* 手機底部快捷欄（開啟最近紀錄／濾心設定） */
+.mobile-dock{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; flex-shrink:0;
+}
+.dock-btn{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:clamp(9px, 1.5dvh, 12px); border-radius:18px;
+  background:var(--glass); border:1px solid var(--edge);
+  box-shadow:var(--shadow),inset 0 1px 0 var(--hi);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);
+  color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+}
+.dock-btn svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dock-btn:active{transform:scale(.97)}
+
+/* 紀錄與設定面板（手機為彈出抽屜，平板／電腦為常駐卡片） */
+.side-col{display:contents}
+.panel{display:none}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.panel-head h2{margin:0}
+.panel-close{
+  border:0;background:var(--soft);color:var(--text);
+  width:28px;height:28px;border-radius:50%;font-size:15px;line-height:1;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.sheet-backdrop{
+  position:fixed;inset:0;z-index:30;background:rgba(3,15,22,.4);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.sheet-backdrop.show{opacity:1;pointer-events:auto}
+
+@media (max-width: 767px){
+  .panel.active{
+    display:flex; flex-direction:column;
+    position:fixed; left:14px; right:14px;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 14px);
+    max-width:420px; max-height:70dvh; margin:0 auto;
+    z-index:40; background:var(--glass-strong);
+    animation:sheetUp .25s cubic-bezier(.22,.8,.3,1);
+  }
+}
+@keyframes sheetUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.log-wrap{flex:1;min-height:0;overflow-y:auto;padding-right:2px}
+.log-wrap::-webkit-scrollbar{width:4px}
+.log-wrap::-webkit-scrollbar-thumb{background:var(--edge);border-radius:999px}
 ul{list-style:none;margin:0;padding:0}
-li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;font-size:14px;border-top:1px solid var(--edge);font-variant-numeric:tabular-nums}
+li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;font-size:13px;border-top:1px solid var(--edge);font-variant-numeric:tabular-nums}
+li:first-child{border-top:0}
 li span:last-child{color:var(--muted);font-size:12px}
 li.undone{opacity:.4;text-decoration:line-through}
-.empty{margin:0;font-size:14px;color:var(--muted)}
+.empty{margin:12px 0;font-size:13px;color:var(--muted);text-align:center}
 .field-label{display:block;margin-bottom:8px;font-size:13px;color:var(--muted)}
-.inner .btn{margin-top:12px}
+.settings-body{display:flex;flex-direction:column;gap:10px;margin-top:auto}
 
-#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,20px);opacity:0;pointer-events:none;
-  max-width:calc(100% - 40px);padding:12px 18px;border-radius:999px;font-size:14px;font-weight:600;color:var(--text);
+/* ───────── 平板與電腦版：一頁式美學 Bento 儀表板 (≥768px) ───────── */
+@media (min-width: 768px){
+  body{padding:24px 32px}
+  .app{
+    max-width:860px; max-height:720px;
+    gap:18px;
+  }
+  header{padding:0 4px}
+  h1{font-size:24px}
+  .seg button{font-size:13px;padding:6px 14px}
+
+  .mobile-dock,.panel-close,.sheet-backdrop{display:none!important}
+
+  /* 平板直向：2x2 對稱 Bento 網格 */
+  .bento{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1.15fr 0.85fr;
+    gap:18px;
+  }
+  .card{border-radius:28px;padding:22px 24px}
+  .panel{display:flex;flex-direction:column;min-height:0}
+
+  /* 平板與電腦版主視覺改為居中大水球展示 */
+  .hero{text-align:center;justify-content:space-between}
+  .hero-main{flex-direction:column;gap:14px;margin:auto 0}
+  .tank{width:clamp(130px, 17dvh, 172px);height:clamp(130px, 17dvh, 172px)}
+  .hero-info{align-items:center}
+  .reading{font-size:clamp(44px, 5.5dvh, 58px)}
+  .meta{align-items:center;min-height:38px}
+}
+
+/* ───────── 電腦與橫向大平板：三欄式黃金比例 Bento (≥1024px) ───────── */
+@media (min-width: 1024px){
+  body{padding:32px 44px}
+  .app{max-width:1100px;max-height:680px;gap:20px}
+  .bento{
+    grid-template-columns:1.08fr 1.08fr 0.88fr;
+    grid-template-rows:1fr;
+    gap:20px;
+  }
+  .side-col{
+    display:grid;
+    grid-template-rows:1.15fr 0.85fr;
+    gap:20px;
+    min-height:0;
+  }
+  .tank{width:clamp(150px, 21dvh, 192px);height:clamp(150px, 21dvh, 192px)}
+  .reading{font-size:clamp(50px, 6.2dvh, 64px)}
+}
+
+/* 極小高度防呆（例如手機橫放或鍵盤彈出時允許捲動） */
+@media (max-height: 540px){
+  body{height:auto;max-height:none;overflow-y:auto}
+  .app{height:auto;max-height:none}
+}
+
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:60;
+  max-width:calc(100% - 40px);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;color:var(--text);
   background:var(--glass-strong);border:1px solid var(--edge);box-shadow:var(--shadow);
   -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);transition:opacity .25s,transform .25s}
 #toast.show{opacity:1;transform:translate(-50%,0)}
@@ -186,61 +337,97 @@ dialog p{margin:0;line-height:1.6;font-size:15px}
     </div>
   </header>
 
-  <section class="card hero" id="hero" data-level="ok">
-    <div class="tank" aria-hidden="true">
-      <div class="water" id="water">
-        <svg class="wave w1" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20Q150 0 300 20T600 20T900 20T1200 20V40H0Z"/></svg>
-        <svg class="wave w2" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20Q150 40 300 20T600 20T900 20T1200 20V40H0Z"/></svg>
+  <div class="bento">
+    <!-- 1. 主視覺水位卡 -->
+    <section class="card hero" id="hero" data-level="ok">
+      <div class="hero-main">
+        <div class="tank" aria-hidden="true">
+          <div class="water" id="water">
+            <svg class="wave w1" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20Q150 0 300 20T600 20T900 20T1200 20V40H0Z"/></svg>
+            <svg class="wave w2" viewBox="0 0 1200 40" preserveAspectRatio="none"><path d="M0 20Q150 40 300 20T600 20T900 20T1200 20V40H0Z"/></svg>
+          </div>
+        </div>
+        <div class="hero-info">
+          <div class="reading" aria-live="polite"><span id="num">---</span><small>L</small></div>
+          <div class="meta">
+            <span class="pill" id="pct">—</span>
+            <span id="eta"></span>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="reading" aria-live="polite"><span id="num">---</span><small>L</small></div>
-    <div class="meta">
-      <span class="pill" id="pct">—</span>
-      <span id="eta"></span>
-    </div>
-    <div class="history-nav">
-      <button class="btn ghost" id="undo" type="button"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>上一步</button>
-      <button class="btn ghost" id="redo" type="button">下一步<svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
-    </div>
-  </section>
+      <div class="history-nav">
+        <button class="btn ghost" id="undo" type="button"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>上一步</button>
+        <button class="btn ghost" id="redo" type="button">下一步<svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+      </div>
+    </section>
 
-  <section class="card">
-    <h2>扣除水量</h2>
-    <div class="stepper">
-      <button class="round" id="minus" type="button" aria-label="減少 100 毫升">−</button>
-      <div class="amt"><b id="step">100</b>ml</div>
-      <button class="round" id="plus" type="button" aria-label="增加 100 毫升">+</button>
-    </div>
-    <div class="stack">
-      <button class="btn primary block" id="confirm" type="button">確認扣除 100 ml</button>
-      <button class="btn soft block" id="five" type="button">扣除 5 公升（常用水壺）</button>
-    </div>
-    <div class="sub">自訂扣除量</div>
-    <div class="custom">
-      <input type="number" id="custom" inputmode="decimal" placeholder="輸入數值" min="0" step="any" aria-label="自訂扣除數值">
-      <button class="btn soft" data-unit="ml" type="button">扣除毫升</button>
-      <button class="btn soft" data-unit="L" type="button">扣除公升</button>
-    </div>
-  </section>
+    <!-- 2. 扣除水量主控台 -->
+    <section class="card deduct-card">
+      <div>
+        <h2>扣除水量</h2>
+        <div class="stepper">
+          <button class="round" id="minus" type="button" aria-label="減少 100 毫升">−</button>
+          <div class="amt"><b id="step">100</b>ml</div>
+          <button class="round" id="plus" type="button" aria-label="增加 100 毫升">+</button>
+        </div>
+        <div class="stack">
+          <button class="btn primary block" id="confirm" type="button">確認扣除 100 ml</button>
+          <button class="btn soft block" id="five" type="button">扣除 5 公升（常用水壺）</button>
+        </div>
+      </div>
+      <div>
+        <div class="sub">自訂扣除量</div>
+        <div class="custom">
+          <input type="number" id="custom" inputmode="decimal" placeholder="輸入數值" min="0" step="any" aria-label="自訂扣除數值">
+          <button class="btn soft" data-unit="ml" type="button">扣除毫升</button>
+          <button class="btn soft" data-unit="L" type="button">扣除公升</button>
+        </div>
+      </div>
+    </section>
 
-  <details class="card">
-    <summary>最近紀錄</summary>
-    <div class="inner">
-      <ul id="log"></ul>
-      <p class="empty" id="logEmpty">還沒有紀錄</p>
-    </div>
-  </details>
+    <!-- 3. 最近紀錄 & 濾心設定（平板與電腦常駐顯示，手機點擊下方快捷鍵彈出） -->
+    <div class="side-col">
+      <section class="card panel" id="logPanel">
+        <div class="panel-head">
+          <h2>最近紀錄</h2>
+          <button type="button" class="panel-close" data-close aria-label="關閉">✕</button>
+        </div>
+        <div class="log-wrap">
+          <ul id="log"></ul>
+          <p class="empty" id="logEmpty">還沒有紀錄</p>
+        </div>
+      </section>
 
-  <details class="card">
-    <summary>濾心設定</summary>
-    <div class="inner">
-      <label class="field-label" for="cap">新濾心總容量（公升）</label>
-      <input type="number" id="cap" inputmode="decimal" min="0" step="any" value="900">
-      <button class="btn danger block" id="reset" type="button">重置 / 更換濾心</button>
+      <section class="card panel" id="setPanel">
+        <div class="panel-head">
+          <h2>濾心設定</h2>
+          <button type="button" class="panel-close" data-close aria-label="關閉">✕</button>
+        </div>
+        <div class="settings-body">
+          <div>
+            <label class="field-label" for="cap">新濾心總容量（公升）</label>
+            <input type="number" id="cap" inputmode="decimal" min="0" step="any" value="900">
+          </div>
+          <button class="btn danger block" id="reset" type="button">重置 / 更換濾心</button>
+        </div>
+      </section>
     </div>
-  </details>
+  </div>
+
+  <!-- 手機版專用底部雙快捷鍵 -->
+  <nav class="mobile-dock" aria-label="紀錄與設定">
+    <button type="button" class="dock-btn" data-open="logPanel">
+      <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      最近紀錄
+    </button>
+    <button type="button" class="dock-btn" data-open="setPanel">
+      <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      濾心設定
+    </button>
+  </nav>
 </main>
 
+<div class="sheet-backdrop" id="backdrop"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <dialog id="dlg">
@@ -288,6 +475,20 @@ document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click'
   applyTheme();
 }));
 mq.addEventListener ? mq.addEventListener('change', applyTheme) : mq.addListener(applyTheme);
+
+/* ───────── 手機版底部抽屜開關 ───────── */
+function closeSheets(){
+  document.querySelectorAll('.panel.active').forEach(p => p.classList.remove('active'));
+  $('backdrop').classList.remove('show');
+}
+document.querySelectorAll('[data-open]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    closeSheets();
+    $(btn.dataset.open).classList.add('active');$('backdrop').classList.add('show');
+  });
+});
+document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', closeSheets));
+$('backdrop').addEventListener('click', closeSheets);
 
 /* ───────── 雲端通訊 ───────── */
 async function api(action, amount){
@@ -369,7 +570,6 @@ async function travel(dir){
       const ok = await ask(`雲端目前是 ${cur.toFixed(2)} L，和這筆紀錄不一致（可能其他裝置也有更動）。仍要${undo ? '還原' : '重做'}並設為 ${target.toFixed(2)} L 嗎？`);
       if (!ok) return;
     }
-    // 現有 API 沒有「復原」動作，所以用 reset 把剩餘水量設回指定值
     state.remaining = await api('reset', +target.toFixed(3));
     state.total = undo ? e.totalBefore : e.totalAfter;
     state.ptr += undo ? -1 : 1;
@@ -462,20 +662,15 @@ function toast(msg, isError){
 const buzz = () => { try { navigator.vibrate && navigator.vibrate(12); } catch(e){} };
 
 function ask(msg){
-  const dlg = $('dlg');
-  $('dlgMsg').textContent = msg;
+  const dlg = $('dlg');$('dlgMsg').textContent = msg;
   dlg.returnValue = '';
   dlg.showModal();
   return new Promise(res => dlg.addEventListener('close', () => res(dlg.returnValue === 'ok'), { once: true }));
 }
 
 /* ───────── 操作 ───────── */
-$('minus').addEventListener('click', () => { state.step = Math.max(100, state.step - 100); render(); });
-$('plus').addEventListener('click', () => { state.step += 100; render(); });
-$('confirm').addEventListener('click', async () => {
-  if (await perform('deduct', state.step / 1000)) { state.step = 100; render(); }
-});
-$('five').addEventListener('click', () => perform('deduct', 5));
+$('minus').addEventListener('click', () => { state.step = Math.max(100, state.step - 100); render(); });$('plus').addEventListener('click', () => { state.step += 100; render(); });
+$('confirm').addEventListener('click', async () => { if (await perform('deduct', state.step / 1000)) { state.step = 100; render(); } });$('five').addEventListener('click', () => perform('deduct', 5));
 
 document.querySelectorAll('.custom .btn').forEach(btn => btn.addEventListener('click', async () => {
   const input = $('custom');
@@ -488,13 +683,13 @@ document.querySelectorAll('.custom .btn').forEach(btn => btn.addEventListener('c
 $('reset').addEventListener('click', async () => {
   const cap = parseFloat($('cap').value);
   if (isNaN(cap) || cap <= 0) { toast('請輸入有效的濾心總公升數', true); return; }
-  if (await ask(`確定要將雲端剩餘水量重置為 ${cap} 公升嗎？`)) perform('reset', cap);
+  if (await ask(`確定要將雲端剩餘水量重置為 ${cap} 公升嗎？`)) {
+    if (await perform('reset', cap)) closeSheets();
+  }
 });
 
-$('undo').addEventListener('click', () => travel(-1));
-$('redo').addEventListener('click', () => travel(1));
+$('undo').addEventListener('click', () => travel(-1));$('redo').addEventListener('click', () => travel(1));
 
-// 回到 App（例如從背景切回來）時自動更新
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
 
 /* ───────── 啟動 ───────── */
